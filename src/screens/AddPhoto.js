@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { addPost } from '../store/actions/posts'
 import {
   View,
   Text,
@@ -14,6 +16,8 @@ import {
 import ImagePicker from 'react-native-image-picker'
 
 import icon from '../../assets/imgs/icon.png'
+
+const noUser = 'Você precisa estar logado para adicionar imagens'
 
 class AddPhoto extends Component {
   state = {
@@ -56,6 +60,11 @@ class AddPhoto extends Component {
         }
       });*/
 
+    if (!this.props.name) {
+      Alert.alert('Falha!', noUser)
+      return
+    }
+
     ImagePicker.showImagePicker({
       title: 'Escolhar a imagem',
       maxHeight: 600,
@@ -70,7 +79,25 @@ class AddPhoto extends Component {
   }
 
   save = async () => {
-    Alert.alert('Imagem adicionada!', this.state.comment)
+    if (!this.props.name) {
+      Alert.alert('Falha!', noUser)
+      return
+    }
+
+    //Alert.alert('Imagem adicionada!', this.state.comment)
+    this.props.onAddPost({
+      id: Math.random(),
+      nickname: this.props.name,
+      email: this.props.email,
+      image: this.state.image,
+      comments: [{
+        nickname: this.props.name,
+        comment: this.state.comment
+      }]
+    })
+
+    this.setState({ image: null, comment: '' })
+    this.props.navigation.navigate('Feed')
   }
 
   render() {
@@ -78,20 +105,19 @@ class AddPhoto extends Component {
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.title}>Updalod de foto</Text>
-          <Text>teste3</Text>
           <Image source={this.state.image} style={styles.image} />
 
           <View style={styles.imageContainer}>
             <TouchableOpacity onPress={this.pickImage} style={styles.buttom}>
               <Text style={styles.buttomText}>Escolha a foto</Text>
             </TouchableOpacity>
-
             <TextInput placeholder='Algum comentário para a foto?' style={styles.input}
+              editable={this.props.name != null}
               value={this.state.comment} onChangeText={comment => this.setState({ comment })} />
-            <TouchableOpacity onPress={this.save} style={styles.buttom}>
-              <Text style={styles.buttomText}>Salvar</Text>
-            </TouchableOpacity>
           </View>
+          <TouchableOpacity onPress={this.save} style={styles.buttom}>
+            <Text style={styles.buttomText}>Salvar</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     )
@@ -116,7 +142,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: Dimensions.get('window').height / 2,
+    height: Dimensions.get('window').height / 3,
     resizeMode: 'center'
   },
   buttom: {
@@ -134,4 +160,18 @@ const styles = StyleSheet.create({
   }
 })
 
-export default AddPhoto
+//export default AddPhoto
+const mapStateToProps = ({ user }) => {
+  return {
+    email: user.email,
+    name: user.name
+    // could pass only user or user: user that would also work
+  }
+}
+const mapDispatchToProps = dispatch => {
+  return {
+    onAddPost: post => dispatch(addPost(post))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddPhoto)

@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { login } from '../store/actions/user'
 import {
   View,
   Text,
@@ -9,11 +11,13 @@ import {
 
 class Login extends Component {
   state = {
+    name: 'Temporário',
     email: '',
     passowrd: '',
   }
 
   login = () => {
+    this.props.onLogin({ ...this.state })
     this.props.navigation.navigate('Profile')
   }
 
@@ -30,7 +34,7 @@ class Login extends Component {
         <TouchableOpacity onPress={this.login} style={styles.buttom}>
           <Text style={styles.buttomText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={this.props.navigation.navigate('Register')}
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('Register')}
           style={styles.buttom}>
           <Text style={styles.buttomText}>Criar conta</Text>
         </TouchableOpacity>
@@ -64,4 +68,14 @@ const styles = StyleSheet.create({
   }
 })
 
-export default Login
+const mapDispatchToProps = dispatch => {
+  return {
+    // chama o action creator login passando user como parâmetro e encaminha pra todos reducers (dispatch)
+    onLogin: user => dispatch(login(user))
+  }
+}
+
+//export default Login
+// params mapStateToProps (faria uma função que mapearia os dados/propriedades desse componente),
+// mapDispatchToProps
+export default connect(null, mapDispatchToProps)(Login)

@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { addComment } from '../store/actions/posts'
 import {
   StyleSheet,
   View,
@@ -15,14 +17,25 @@ class AddComment extends Component {
     editMode: false
   }
 
+   // 1 handleAddComment
   handleAddComment = () => {
-    Alert.alert('Adicionado!', this.state.comment)
+    // 2 aqui
+    //Alert.alert('Adicionado!', this.state.comment)
+    this.props.onAddComment({
+      postId: this.props.postId,
+      comment: {
+        nickname: this.props.name,
+        comment: this.state.comment
+      }
+    })
+
+    this.setState({ comment: '', editMode: false })
   }
 
   render() {
     let commentArea = null
     if (this.state.editMode) {
-      Alert.alert('Editando!')
+      // Alert.alert('Editando!')
       commentArea = (
         <View style={styles.container}>
           <TextInput placeholder='Pode comentar...'
@@ -30,6 +43,7 @@ class AddComment extends Component {
             value={this.state.comment}
             onChangeText={comment => this.setState({ comment })}
             onSubmitEditing={this.handleAddComment} />
+            
           <TWF onPress={() => this.setState({ editMode: false })}>
             <Icon name='times' size={15} color='#555' />
           </TWF>
@@ -71,4 +85,20 @@ const styles = StyleSheet.create({
   }
 })
 
-export default AddComment
+//export default AddComment
+const mapStateToProps = ({ user }) => {
+  return {
+    user: user.name
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    // 3 passo entra aqui, 4 chama o actionCreator addComment abaixo
+    onAddComment: payload => dispatch(addComment(payload))
+    // 5 actions/posts addComment
+    // 6 dispara o ADD_COMMENT chamado em store/actions/posts addComment no reducers/posts
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddComment)
